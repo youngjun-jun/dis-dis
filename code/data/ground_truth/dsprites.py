@@ -29,10 +29,6 @@ from six.moves import range
 class Dataset(ground_truth_data.GroundTruthData):
   """DSprites dataset.
 
-  The data set was originally introduced in "beta-VAE: Learning Basic Visual
-  Concepts with a Constrained Variational Framework" and can be downloaded from
-  https://github.com/deepmind/dsprites-dataset.
-
   The ground-truth factors of variation are (in the default setting):
   0 - shape (3 different values)
   1 - scale (6 different values)

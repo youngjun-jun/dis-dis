@@ -1,5 +1,4 @@
 import sys
-sys.path.append('/nfs/home/youngjun/NeurIPS2024/EncDiff')
 from evaluation.metrics import utils
 import numpy as np
 from absl import logging
@@ -25,8 +24,6 @@ def compute_infomec(ground_truth_data, representation_function, random_state,
     latent_quantiles = np.quantile(latents, q=[0.25, 0.75], axis=0)
     latent_iqr = latent_quantiles[1] - latent_quantiles[0]
     if discrete_latents:
-        # active_latents = latent_ranges > 0
-        # active_latents = latent_ranges > 0.5    # quantizer outputs values in [-1, 1]
         active_latents = latent_iqr > 0.1
     else:
         active_latents = latent_iqr > np.max(latent_iqr) / 10
@@ -129,32 +126,3 @@ def compute_infoe(sources, latents, discrete_latents):
         )
 
     return np.mean(normalized_predictive_information_per_source)
-
-
-## evaluate code에 적용시켜야함 
-
-# result_dict = compute_infomec(ground_truth_data, representation_function, np.random.RandomState(0),discrete_latents=False,test_size=10000)
-# print("infoMEC score:" + str(result_dict))
-# total_results_dict["beta_VAE" + preflix] = result_dict
-# heatmap=True
-# if heatmap:
-#     # NMI heatmap
-#     import matplotlib.pyplot as plt
-#     import seaborn as sns
-#     fig, ax = plt.subplots(figsize=(10, 5))
-#     nmi = result_dict['nmi']; active_latents = result_dict['active_latents']
-#     sns.heatmap(
-#         nmi, ax=ax, annot=True, fmt='.2f', square=True, vmin=0, vmax=1, cbar=False,
-#         annot_kws={'fontsize': 8},
-#         xticklabels=[rf'$\mathbf{{z}}_{{{i}}}$' for i in range(nmi.shape[1])],
-#         yticklabels=[rf'$\mathbf{{x}}_{{{i}}}$' for i in range(nmi.shape[0])],
-#         rasterized=True
-#     )
-
-#     for i, label in enumerate(ax.get_xticklabels()):
-#         if active_latents[i] == 0:
-#             label.set_color('red')
-
-#     fig.tight_layout()
-#     wandb.log({"nmi_heatmap": wandb.Image(fig)})
-#     plt.show()

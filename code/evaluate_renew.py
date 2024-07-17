@@ -16,7 +16,6 @@ def set_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-    # For consistent results across runs
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
@@ -136,8 +135,6 @@ def eval_func(eval_dataset, data_tensor, metric_folder, it, preflix=""):
             plt.savefig(metric_folder + f"/{it}_nmi_heatmap.png", bbox_inches='tight')
             plt.close(fig)
 
-    # write_text(total_results_dict, metric_folder + f"/{it}.json")
-        
     return total_results_dict        
             
 def find_metric_in_jsons(folder_path,metric,sub):
@@ -175,20 +172,6 @@ def plot_metric(path):
     plt.grid(True)
     plt.savefig(root_folder + '/metric.png')
     plt.clf()
-    
-    # root_folder = '/'.join(path.split('/')[:-1])
-    # print(f'Result folder found: {path}')
-    
-    # metric = ['beta_VAE','dci','MIG','factor_VAE','infoMEC score', 'Modularity', 'SAP']
-    # sub = ['eval_accuracy','disentanglement','discrete_mig','eval_accuracy','infom', 'modularity_score', 'SAP_score']
-    
-    # for m, s in zip(metric, sub):
-    #     try:
-    #         sns.lineplot(find_metric_in_jsons(path, m, s), label=m)
-    #     except:
-    #         continue
-    # plt.savefig(root_folder + '/metric.png')
-    # plt.clf()
 
 def plot_loss(path):
     try:
@@ -240,24 +223,14 @@ if __name__ == "__main__":
         default="shapes3d",
     )
     parser.add_argument(
-        "--st",
+        "--epoch",
         type=int,
         default=0,
-    )
-    parser.add_argument(
-        "--end",
-        type=int,
-        default=0,
-    )
-    parser.add_argument(
-        "--freq",
-        type=int,
-        default=1,
     )
     parser.add_argument(
         "--tad_samples",
         type=int,
-        default=202599,
+        default=10000,
     )
     parser.add_argument(
         "--seed",
@@ -266,7 +239,6 @@ if __name__ == "__main__":
     )
     
     args = parser.parse_args()
-    #np.random.seed(args.seed)
     set_seed(args.seed)
 
     def make_dis_dataset(data_name, tad_samples):
@@ -283,8 +255,8 @@ if __name__ == "__main__":
             import data.ground_truth.celeba as dceleba
             return dceleba.Dataset(np.arange(0,202599))
         elif data_name == "celeba":
-            dataset = CustomImageDataset(zip_file='/nfs/home/youngjun/NeurIPS2024/datasets/celeba_64.npz',
-                                         csv_file='/nfs/home/youngjun/NeurIPS2024/datasets/raw_data/celeba/attr_celeba.csv')
+            dataset = CustomImageDataset(zip_file='celeba_64.npz',
+                                         csv_file='celeba/attr_celeba.csv')
             eval_bs = tad_samples
             dataloader = DataLoader(dataset, batch_size=eval_bs, shuffle=True, num_workers=4)
             return dataloader
@@ -306,8 +278,6 @@ if __name__ == "__main__":
                 if key not in fieldnames:
                     fieldnames[key] = None
                 row[key] = sub_dict
-        
-        # fieldnames = sorted(fieldnames.keys())
         
         try:
             df_existing = pd.read_csv(filename)
@@ -331,152 +301,119 @@ if __name__ == "__main__":
     def evaluate_process(label_dataset, args):
         os.makedirs(os.path.join(args.exp_dir, "results"), exist_ok=True)
         
-        for i in range(args.st, args.end, args.freq):
-            
-            # dis_repre_dir = os.path.join(args.exp_dir, "dis_repre")
-            # if not os.path.exists(dis_repre_dir):
-            #     import shutil
-            #     from_dis_repre_dir = os.path.join('/'.join(args.exp_dir.split("/")[:-1]), "dis_repre")
-            #     shutil.copytree(from_dis_repre_dir, dis_repre_dir)
-            
-            data = os.path.join(args.exp_dir, "dis_repre/epoch={:06d}.npz".format(i))
-            data_array = np.load(data)
-            data_array = np.nan_to_num(data_array["latents"])
-            latents = torch.from_numpy(data_array)
-            result_dict = eval_func(label_dataset, latents, os.path.join(args.exp_dir, "results"), "results-{:06d}".format(i))
-            
-            save_dict = OrderedDict({'index': i})
-            save_dict.update(result_dict)
-            append_dict_to_csv(save_dict, os.path.join(args.exp_dir,"metrics.csv"))
-     
-    def evaluate_process_rapid(label_dataset):
-        os.makedirs(os.path.join(args.exp_dir, "results"), exist_ok=True)
+        data = os.path.join(args.exp_dir, "dis_repre/epoch={:06d}.npz".format(args.epoch))
+        data_array = np.load(data)
+        data_array = np.nan_to_num(data_array["latents"])
+        latents = torch.from_numpy(data_array)
+        result_dict = eval_func(label_dataset, latents, os.path.join(args.exp_dir, "results"), "results-{:06d}".format(args.epoch))
         
-        for i in range(args.st, args.end, args.freq):
-            
-            # dis_repre_dir = os.path.join(args.exp_dir, "dis_repre")
-            # if not os.path.exists(dis_repre_dir):
-            #     import shutil
-            #     from_dis_repre_dir = os.path.join('/'.join(args.exp_dir.split("/")[:-1]), "dis_repre")
-            #     shutil.copytree(from_dis_repre_dir, dis_repre_dir)
-            
-            data = os.path.join(args.exp_dir, "dis_repre/epoch={:06d}.npz".format(i))
-            data_array = np.load(data)
-            data_array = np.nan_to_num(data_array["latents"])
-            latents = torch.from_numpy(data_array)
-            result_dict = eval_func(label_dataset, latents, os.path.join(args.exp_dir, "results"), "results-{:06d}".format(i))
-            
-            save_dict = OrderedDict({'index': i})
-            save_dict.update(result_dict)
-            append_dict_to_csv(save_dict, os.path.join(args.exp_dir, "metrics.csv"))
+        save_dict = OrderedDict({'index': args.epoch})
+        save_dict.update(result_dict)
+        append_dict_to_csv(save_dict, os.path.join(args.exp_dir,"metrics.csv"))
         
     from ae_utils_exp import tags, aurocs
     def evaluate_tad(dataset, args):
         os.makedirs(os.path.join(args.exp_dir, "results"), exist_ok=True)
         
-        for epoch in range(args.st, args.end, args.freq):
+        _, targ, idx = next(iter(dataset))
+        
+        data = os.path.join(args.exp_dir, "dis_repre/epoch={:06d}.npz".format(args.epoch))
+        data_array = np.load(data)
+        data_array = np.nan_to_num(data_array["latents"])
+        latents = torch.from_numpy(data_array[idx])
+        pca_list = []
+        for i in range(latents.shape[1]):
+            pca = PCA(n_components=1)
+            pca_result = pca.fit_transform(latents[:,i,:].numpy())
+            pca_list.append(pca_result)
             
-            _, targ, idx = next(iter(dataset))
-            
-            data = os.path.join(args.exp_dir, "dis_repre/epoch={:06d}.npz".format(epoch))
-            data_array = np.load(data)
-            data_array = np.nan_to_num(data_array["latents"])
-            latents = torch.from_numpy(data_array[idx])
-            pca_list = []
-            for i in range(latents.shape[1]):
-                pca = PCA(n_components=1)
-                pca_result = pca.fit_transform(latents[:,i,:].numpy())
-                pca_list.append(pca_result)
-                
-            pca_rep = np.concatenate(pca_list, axis=1)
-            pca_rep = np.nan_to_num(pca_rep)
-            
-            aurocs_all = torch.ones((40, latents.shape[1])) * 0.5
-            with torch.no_grad():
-                base_rates_all = targ.sum(dim=0)
-                base_rates_all = base_rates_all / targ.shape[0]
-                out = torch.from_numpy(pca_rep)
-                _ma = out.max(dim=0)[0]
-                _mi = out.min(dim=0)[0]
-                for i in range(40):
-                    aurocs_all[i] = aurocs(out.clone(), targ, i, _ma, _mi)
-                au_result = aurocs_all ; base_rates_raw = base_rates_all ; targ = targ
-                base_rates = base_rates_raw.where(base_rates_raw <= 0.5, 1. - base_rates_raw)
-            
-            max_aur, argmax_aur = torch.max(au_result.clone(), dim=1)
-            norm_diffs = torch.zeros(40)
-            aurs_diffs = torch.zeros(40)
-            for ind, tag, max_a, argmax_a, aurs in zip(range(40), tags, max_aur.clone(), argmax_aur.clone(), au_result.clone()):
-                norm_aurs = (aurs.clone() - 0.5) / (aurs.clone()[argmax_a] - 0.5)
-                aurs_next = aurs.clone()
-                aurs_next[argmax_a] = 0.0
-                aurs_diff = max_a - aurs_next.max()
-                aurs_diffs[ind] = aurs_diff
-                norm_aurs[argmax_a] = 0.0
-                norm_diff = 1. - norm_aurs.max()
-                norm_diffs[ind] = norm_diff
-                print("{}\t\t Lat: {}\t Max: {:1.3f}\t ND: {:1.3f}".format(tag, argmax_a.item(), max_a.item(), norm_diff.item()))
-                plt_ind = ind//5, ind%5
-                assert aurs.max() == max_a
+        pca_rep = np.concatenate(pca_list, axis=1)
+        pca_rep = np.nan_to_num(pca_rep)
+        
+        aurocs_all = torch.ones((40, latents.shape[1])) * 0.5
+        with torch.no_grad():
+            base_rates_all = targ.sum(dim=0)
+            base_rates_all = base_rates_all / targ.shape[0]
+            out = torch.from_numpy(pca_rep)
+            _ma = out.max(dim=0)[0]
+            _mi = out.min(dim=0)[0]
+            for i in range(40):
+                aurocs_all[i] = aurocs(out.clone(), targ, i, _ma, _mi)
+            au_result = aurocs_all ; base_rates_raw = base_rates_all ; targ = targ
+            base_rates = base_rates_raw.where(base_rates_raw <= 0.5, 1. - base_rates_raw)
+        
+        max_aur, argmax_aur = torch.max(au_result.clone(), dim=1)
+        norm_diffs = torch.zeros(40)
+        aurs_diffs = torch.zeros(40)
+        for ind, tag, max_a, argmax_a, aurs in zip(range(40), tags, max_aur.clone(), argmax_aur.clone(), au_result.clone()):
+            norm_aurs = (aurs.clone() - 0.5) / (aurs.clone()[argmax_a] - 0.5)
+            aurs_next = aurs.clone()
+            aurs_next[argmax_a] = 0.0
+            aurs_diff = max_a - aurs_next.max()
+            aurs_diffs[ind] = aurs_diff
+            norm_aurs[argmax_a] = 0.0
+            norm_diff = 1. - norm_aurs.max()
+            norm_diffs[ind] = norm_diff
+            print("{}\t\t Lat: {}\t Max: {:1.3f}\t ND: {:1.3f}".format(tag, argmax_a.item(), max_a.item(), norm_diff.item()))
+            plt_ind = ind//5, ind%5
+            assert aurs.max() == max_a
 
-            with torch.no_grad():
-                not_targ = 1 - targ
-                j_prob = lambda x, y: torch.logical_and(x, y).sum() / x.numel()
-                mi = lambda jp, px, py: 0. if jp == 0. or px == 0. or py == 0. else jp*torch.log(jp/(px*py))
+        with torch.no_grad():
+            not_targ = 1 - targ
+            j_prob = lambda x, y: torch.logical_and(x, y).sum() / x.numel()
+            mi = lambda jp, px, py: 0. if jp == 0. or px == 0. or py == 0. else jp*torch.log(jp/(px*py))
 
-                mi_mat = torch.zeros((40, 40))
-                for i in range(40):
-                    i_mp = targ[:, i].sum() / targ.shape[0]
-                    for j in range(40):
-                        j_mp = targ[:, j].sum() / targ.shape[0]
-                        # FF
-                        jp = j_prob(not_targ[:, i], not_targ[:, j])
-                        pi = 1. - i_mp
-                        pj = 1. - j_mp
-                        mi_mat[i][j] += mi(jp, pi, pj)
-                        # FT
-                        jp = j_prob(not_targ[:, i], targ[:, j])
-                        pi = 1. - i_mp
-                        pj = j_mp
-                        mi_mat[i][j] += mi(jp, pi, pj)
-                        # TF
-                        jp = j_prob(targ[:, i], not_targ[:, j])
-                        pi = i_mp
-                        pj = 1. - j_mp
-                        mi_mat[i][j] += mi(jp, pi, pj)
-                        # TT
-                        jp = j_prob(targ[:, i], targ[:, j])
-                        pi = i_mp
-                        pj = j_mp
-                        mi_mat[i][j] += mi(jp, pi, pj)
+            mi_mat = torch.zeros((40, 40))
+            for i in range(40):
+                i_mp = targ[:, i].sum() / targ.shape[0]
+                for j in range(40):
+                    j_mp = targ[:, j].sum() / targ.shape[0]
+                    # FF
+                    jp = j_prob(not_targ[:, i], not_targ[:, j])
+                    pi = 1. - i_mp
+                    pj = 1. - j_mp
+                    mi_mat[i][j] += mi(jp, pi, pj)
+                    # FT
+                    jp = j_prob(not_targ[:, i], targ[:, j])
+                    pi = 1. - i_mp
+                    pj = j_mp
+                    mi_mat[i][j] += mi(jp, pi, pj)
+                    # TF
+                    jp = j_prob(targ[:, i], not_targ[:, j])
+                    pi = i_mp
+                    pj = 1. - j_mp
+                    mi_mat[i][j] += mi(jp, pi, pj)
+                    # TT
+                    jp = j_prob(targ[:, i], targ[:, j])
+                    pi = i_mp
+                    pj = j_mp
+                    mi_mat[i][j] += mi(jp, pi, pj)
 
-                mi_maxes, mi_inds = (mi_mat * (1 - torch.eye(40))).max(dim=1)
-                ent_red_prop = 1. - (mi_mat.diag() - mi_maxes) / mi_mat.diag()
-                print(mi_mat.diag())
-            thresh = 0.75
-            ent_red_thresh = 0.2
+            mi_maxes, mi_inds = (mi_mat * (1 - torch.eye(40))).max(dim=1)
+            ent_red_prop = 1. - (mi_mat.diag() - mi_maxes) / mi_mat.diag()
+            print(mi_mat.diag())
+        thresh = 0.75
+        ent_red_thresh = 0.2
 
-            # calculate Average Norm AUROC Diff when best detector score is at a certain threshold
-            filt = (max_aur >= thresh).logical_and(ent_red_prop <= ent_red_thresh)
-            # calculate Average Norm AUROC Diff when best detector score is at a certain threshold
-            aurs_diffs_filt = aurs_diffs[filt]
-            print(len(aurs_diffs_filt))
-            plt.figure(figsize=(10, 7))
-            plt.ylim((0.0, 1.0))
-            plt.title("Total AUROC Diff: {:1.3f} at Thresh: {:1.2f}".format(aurs_diffs_filt.sum(), thresh))
-            plt.ylabel("AUROC Difference")
-            plt.xlabel("Attribute")
-            plt.xticks(rotation=90)
-            plt.bar(range(aurs_diffs.shape[0]), aurs_diffs, tick_label=tags)
-            plt.grid(which='both', axis='y')
-            plt.savefig(os.path.join(args.exp_dir, "results", 'tad_image-{:06d}.jpg'.format(epoch)))
+        filt = (max_aur >= thresh).logical_and(ent_red_prop <= ent_red_thresh)
+        aurs_diffs_filt = aurs_diffs[filt]
+        print(len(aurs_diffs_filt))
+        plt.figure(figsize=(10, 7))
+        plt.ylim((0.0, 1.0))
+        plt.title("Total AUROC Diff: {:1.3f} at Thresh: {:1.2f}".format(aurs_diffs_filt.sum(), thresh))
+        plt.ylabel("AUROC Difference")
+        plt.xlabel("Attribute")
+        plt.xticks(rotation=90)
+        plt.bar(range(aurs_diffs.shape[0]), aurs_diffs, tick_label=tags)
+        plt.grid(which='both', axis='y')
+        plt.savefig(os.path.join(args.exp_dir, "results", 'tad_image-{:06d}.jpg'.format(args.epoch)))
 
-            print("TAD SCORE: ", aurs_diffs_filt.sum().item(), "Attributes Captured: ", len(aurs_diffs_filt))
-            result_dict = {'TAD SCORE': aurs_diffs_filt.sum().item(), 'Attributes Captured': len(aurs_diffs_filt)}
-            
-            save_dict = OrderedDict({'index': epoch})
-            save_dict.update(result_dict)
-            append_dict_to_csv(save_dict, os.path.join(args.exp_dir, "metrics.csv"))
+        print("TAD SCORE: ", aurs_diffs_filt.sum().item(), "Attributes Captured: ", len(aurs_diffs_filt))
+        result_dict = {'TAD SCORE': aurs_diffs_filt.sum().item(), 'Attributes Captured': len(aurs_diffs_filt)}
+        
+        save_dict = OrderedDict({'index': args.epoch})
+        save_dict.update(result_dict)
+        append_dict_to_csv(save_dict, os.path.join(args.exp_dir, "metrics.csv"))
 
     
     dataset = make_dis_dataset(args.dataset, args.tad_samples)

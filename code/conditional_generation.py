@@ -7,7 +7,7 @@ from tqdm import trange
 from omegaconf import OmegaConf
 from PIL import Image
 
-from ldm.models.diffusion.ddim_cond import DDIMSampler
+from ldm.models.diffusion.ddim_gen import DDIMSampler
 from ldm.util import instantiate_from_config
 
 rescale = lambda x: (x + 1.) / 2.
@@ -26,7 +26,6 @@ def custom_to_pil(x):
 
 
 def custom_to_np(x):
-    # saves the batch in adm style as in https://github.com/openai/guided-diffusion/blob/main/scripts/image_sample.py
     sample = x.detach().cpu()
     sample = ((sample + 1) * 127.5).clamp(0, 255).to(torch.uint8)
     sample = sample.permute(0, 2, 3, 1)
@@ -150,8 +149,6 @@ def run(model, logdir, batch_size=50, vanilla=False, custom_steps=None, eta=None
 
     tstart = time.time()
     n_saved = len(glob.glob(os.path.join(logdir,'*.png')))-1
-    # path = logdir
-    # if model.cond_stage_model is None:
     all_images = []
 
     from PIL import Image
@@ -176,8 +173,6 @@ def run(model, logdir, batch_size=50, vanilla=False, custom_steps=None, eta=None
     nppath = os.path.join(nplog, f"{shape_str}-samples.npz")
     np.savez(nppath, all_img)
 
-    # else:
-    #    raise NotImplementedError('Currently only sampling for unconditional models supported.')
 
     print(f"sampling of {n_saved} images finished in {(time.time() - tstart) / 60.:.2f} minutes.")
 
@@ -190,7 +185,6 @@ def save_logs(logs, path, n_saved=0, key="sample", np_path=None):
                 for x in batch:
                     img = custom_to_pil(x)
                     imgpath = os.path.join(path, f"{key}_{n_saved:06}.png")
-                    # img.save(imgpath)
                     n_saved += 1
             else:
                 npbatch = custom_to_np(batch)
@@ -301,14 +295,12 @@ if __name__ == "__main__":
     if not os.path.exists(opt.resume):
         raise ValueError("Cannot find {}".format(opt.resume))
     if os.path.isfile(opt.resume):
-        # paths = opt.resume.split("/")
         try:
             logdir = '/'.join(opt.resume.split('/')[:-1])
-            # idx = len(paths)-paths[::-1].index("logs")+1
             print(f'Logdir is {logdir}')
         except ValueError:
             paths = opt.resume.split("/")
-            idx = -2  # take a guess: path/to/logdir/checkpoints/model.ckpt
+            idx = -2 
             logdir = "/".join(paths[:idx])
         ckpt = opt.resume
     else:
@@ -349,7 +341,6 @@ if __name__ == "__main__":
     print(logdir)
     print(75 * "=")
 
-    # write config out
     sampling_file = os.path.join(logdir, "sampling_config.yaml")
     sampling_conf = vars(opt)
 

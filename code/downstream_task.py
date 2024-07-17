@@ -109,24 +109,14 @@ if __name__ == "__main__":
         default="shapes3d",
     )
     parser.add_argument(
-        "--st",
-        type=int,
-        default=0,
-    )
-    parser.add_argument(
-        "--end",
-        type=int,
-        default=0,
-    )
-    parser.add_argument(
-        "--freq",
+        "--epoch",
         type=int,
         default=1,
     )
     parser.add_argument(
         "--tad_samples",
         type=int,
-        default=202599,
+        default=10000,
     )
     parser.add_argument(
         "--seed",
@@ -194,17 +184,16 @@ if __name__ == "__main__":
     def evaluate_process(label_dataset, args):
         os.makedirs(os.path.join(args.exp_dir, "results"), exist_ok=True)
         
-        for i in range(args.st, args.end, args.freq):
             
-            data = os.path.join(args.exp_dir, "dis_repre/epoch={:06d}.npz".format(i))
-            data_array = np.load(data)
-            data_array = np.nan_to_num(data_array["latents"])
-            latents = torch.from_numpy(data_array)
-            result_dict = eval_func(label_dataset, latents, os.path.join(args.exp_dir, "results"), "results-{:06d}".format(i))
-            
-            save_dict = OrderedDict({'index': i})
-            save_dict.update(result_dict)
-            append_dict_to_csv(save_dict, os.path.join(args.exp_dir,"metrics_down.csv"))
+        data = os.path.join(args.exp_dir, "dis_repre/epoch={:06d}.npz".format(args.epoch))
+        data_array = np.load(data)
+        data_array = np.nan_to_num(data_array["latents"])
+        latents = torch.from_numpy(data_array)
+        result_dict = eval_func(label_dataset, latents, os.path.join(args.exp_dir, "results"), "results-{:06d}".format(args.epoch))
+        
+        save_dict = OrderedDict({'index': args.epoch})
+        save_dict.update(result_dict)
+        append_dict_to_csv(save_dict, os.path.join(args.exp_dir,"metrics_down.csv"))
 
 
     

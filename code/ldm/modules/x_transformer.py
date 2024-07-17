@@ -1,4 +1,3 @@
-"""shout-out to https://github.com/lucidrains/x-transformers/tree/main/x_transformers"""
 import torch
 from torch import nn, einsum
 import torch.nn.functional as F

@@ -14,7 +14,6 @@ from PIL import Image
 from pytorch_lightning import seed_everything
 from pytorch_lightning.trainer import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, Callback, LearningRateMonitor
-# from pytorch_lightning.utilities.distributed import rank_zero_only
 from pytorch_lightning.utilities.rank_zero import rank_zero_only
 from pytorch_lightning.utilities import rank_zero_info
 
@@ -29,7 +28,6 @@ def set_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-    # For consistent results across runs
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     
@@ -192,7 +190,6 @@ def worker_init_fn(_):
 
     if isinstance(dataset, Txt2ImgIterableBaseDataset):
         split_size = dataset.num_records // worker_info.num_workers
-        # reset num_records to the true number to retain reliable length information
         dataset.sample_ids = dataset.valid_ids[worker_id * split_size:(worker_id + 1) * split_size]
         current_id = np.random.choice(len(np.random.get_state()[1]), 1)
         return np.random.seed(np.random.get_state()[1][current_id] + worker_id)
@@ -214,7 +211,6 @@ class DataModuleFromConfig(pl.LightningDataModule):
             self.train_dataloader = self._train_dataloader
         if validation is not None:
             self.dataset_configs["validation"] = validation
-            # self.val_dataloader = partial(self._val_dataloader, shuffle=shuffle_val_dataloader)
             self.val_dataloader = partial(self._test_dataloader, shuffle=shuffle_test_loader)
         if test is not None:
             self.dataset_configs["test"] = test
@@ -240,8 +236,6 @@ class DataModuleFromConfig(pl.LightningDataModule):
         is_iterable_dataset = isinstance(self.datasets['train'], Txt2ImgIterableBaseDataset)
         if is_iterable_dataset or self.use_worker_init_fn:
             init_fn = worker_init_fn
-            # g = torch.Generator()
-            # g.manual_seed(seed)
         else:
             init_fn = None
         return DataLoader(self.datasets["train"], batch_size=self.batch_size,pin_memory=True,
@@ -266,7 +260,6 @@ class DataModuleFromConfig(pl.LightningDataModule):
         else:
             init_fn = None
 
-        # do not shuffle dataloader for iterable dataset
         shuffle = shuffle and (not is_iterable_dataset)
 
         return DataLoader(self.datasets["test"], batch_size=self.batch_size,pin_memory=True,
@@ -300,7 +293,6 @@ class SetupCallback(Callback):
 
     def on_fit_start(self, trainer, pl_module):
         if trainer.global_rank == 0:
-            # Create logdirs and save configs
             os.makedirs(self.logdir, exist_ok=True)
             os.makedirs(self.ckptdir, exist_ok=True)
             os.makedirs(self.cfgdir, exist_ok=True)
@@ -319,7 +311,6 @@ class SetupCallback(Callback):
                            os.path.join(self.cfgdir, "{}-lightning.yaml".format(self.now)))
 
         else:
-            # ModelCheckpoint callback created log directory --- remove it
             if not self.resume and os.path.exists(self.logdir):
                 dst, name = os.path.split(self.logdir)
                 dst = os.path.join(dst, "child_runs", name)
@@ -339,7 +330,6 @@ class ImageLogger(Callback):
         self.batch_freq = batch_frequency
         self.max_images = max_images
         self.logger_log_images = {
-            # pl.loggers.TestTubeLogger: self._testtube,
             pl.loggers.CSVLogger: self._testtube,
         }
         self.log_steps = [2 ** n for n in range(int(np.log2(self.batch_freq)) + 1)]
@@ -358,9 +348,6 @@ class ImageLogger(Callback):
             grid = (grid + 1.0) / 2.0  # -1,1 -> 0,1; c,h,w
 
             tag = f"{split}/{k}"
-            # pl_module.logger.experiment.add_image(
-            #     tag, grid,
-            #     global_step=pl_module.global_step)
 
     @rank_zero_only
     def log_local(self, save_dir, split, images,
@@ -384,7 +371,6 @@ class ImageLogger(Callback):
 
     def log_img(self, pl_module, batch, batch_idx, split="train"):
         check_idx = batch_idx if self.log_on_batch_idx else pl_module.global_step
-        # self.log_steps = [1000, check_idx]
         if (self.check_frequency(check_idx) and  # batch_idx % self.batch_freq == 0
                 hasattr(pl_module, "log_images") and
                 callable(pl_module.log_images) and
@@ -428,35 +414,20 @@ class ImageLogger(Callback):
         return False
 
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx=0):
-    # def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
-        # if not self.disabled and (pl_module.global_step > 0 or self.log_first_step):
-            # self.log_img(pl_module, batch, batch_idx, split="train")
         pass
 
     def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx=0):
-    # def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
-        # if not self.disabled and pl_module.global_step > 0:
-        #     self.log_img(pl_module, batch, batch_idx, split="val")
-        # if hasattr(pl_module, 'calibrate_grad_norm'):
-        #     if (pl_module.calibrate_grad_norm and batch_idx % 25 == 0) and batch_idx > 0:
-        #         self.log_gradients(trainer, pl_module, batch_idx=batch_idx)
         pass
 
 class CUDACallback(Callback):
-    # see https://github.com/SeanNaren/minGPT/blob/master/mingpt/callback.py
     def on_train_epoch_start(self, trainer, pl_module):
-        # Reset the memory use counter
-        # torch.cuda.reset_peak_memory_stats(trainer.root_gpu)
         torch.cuda.reset_peak_memory_stats(trainer.strategy.root_device.index)
-        # torch.cuda.synchronize(trainer.root_gpu)
         torch.cuda.synchronize(trainer.strategy.root_device.index)
         self.start_time = time.time()
 
     def on_train_epoch_end(self, trainer, pl_module):
-        # torch.cuda.synchronize(trainer.root_gpu)
         torch.cuda.synchronize(trainer.strategy.root_device.index)
         max_memory = torch.cuda.max_memory_allocated(trainer.strategy.root_device.index) / 2 ** 20
-        # max_memory = torch.cuda.max_memory_allocated(trainer.root_gpu) / 2 ** 20
         epoch_time = time.time() - self.start_time
 
         try:
@@ -473,9 +444,6 @@ if __name__ == "__main__":
 
     now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
-    # add cwd for convenience and to make classes in this file available when
-    # running as `python main.py`
-    # (in particular `main.DataModuleFromConfig`)
     sys.path.append(os.getcwd())
 
     parser = get_parser()
@@ -494,8 +462,6 @@ if __name__ == "__main__":
             raise ValueError("Cannot find {}".format(opt.resume))
         if os.path.isfile(opt.resume):
             paths = opt.resume.split("/")
-            # idx = len(paths)-paths[::-1].index("logs")+1
-            # logdir = "/".join(paths[:idx])
             logdir = "/".join(paths[:-2])
             ckpt = opt.resume
         else:
@@ -522,19 +488,12 @@ if __name__ == "__main__":
 
     ckptdir = os.path.join(logdir, "checkpoints")
     cfgdir = os.path.join(logdir, "configs")
-    #seed_everything(opt.seed)
 
-    # try:
-    # init and save configs
     configs = [OmegaConf.load(cfg) for cfg in opt.base]
     cli = OmegaConf.from_dotlist(unknown)
     config = OmegaConf.merge(*configs, cli)
     lightning_config = config.pop("lightning", OmegaConf.create())
-    # merge trainer cli with config
     trainer_config = lightning_config.get("trainer", OmegaConf.create())
-    # default to ddp
-    # trainer_config["accelerator"] = "ddp"
-    # trainer_config["accelerator"] = "cuda"
     trainer_config["accelerator"] = "gpu"
     trainer_config["strategy"] = "ddp"
     for k in nondefault_trainer_args(opt):
@@ -549,7 +508,6 @@ if __name__ == "__main__":
     trainer_opt = argparse.Namespace(**trainer_config)
     lightning_config.trainer = trainer_config
 
-    # model
     if "LatentDiffusion" in config.model['target']:
         if opt.dis_loss_type != None:
             config.model["params"]["dis_loss_type"] = opt.dis_loss_type
@@ -559,10 +517,8 @@ if __name__ == "__main__":
     
     model = instantiate_from_config(config.model)
 
-    # trainer and callbacks
     trainer_kwargs = dict()
 
-    # default logger configs
     default_logger_cfgs = {
         "wandb": {
             "target": "pytorch_lightning.loggers.WandbLogger",
@@ -574,7 +530,6 @@ if __name__ == "__main__":
             }
         },
         "testtube": {
-            # "target": "pytorch_lightning.loggers.TestTubeLogger",
             "target": "pytorch_lightning.loggers.CSVLogger",
             "params": {
                 "name": "testtube",
@@ -590,8 +545,6 @@ if __name__ == "__main__":
     logger_cfg = OmegaConf.merge(default_logger_cfg, logger_cfg)
     trainer_kwargs["logger"] = instantiate_from_config(logger_cfg)
 
-    # modelcheckpoint - use TrainResult/EvalResult(checkpoint_on=metric) to
-    # specify which metric is used to determine best models
     default_modelckpt_cfg = {
         "target": "pytorch_lightning.callbacks.ModelCheckpoint",
         "params": {
@@ -606,7 +559,6 @@ if __name__ == "__main__":
         default_modelckpt_cfg["params"]["monitor"] = model.monitor
         default_modelckpt_cfg["params"]["save_top_k"] = 100000
         default_modelckpt_cfg["params"]["mode"] = "max"
-        # default_modelckpt_cfg["params"]["mode"] = "min"
     if default_modelckpt_cfg["params"]["monitor"] == "train/step_num":
         default_modelckpt_cfg["params"]["every_n_train_steps"] = 2000
         default_modelckpt_cfg["params"]["every_n_epochs"] = None
@@ -622,7 +574,6 @@ if __name__ == "__main__":
     if version.parse(pl.__version__) < version.parse('1.4.0'):
         trainer_kwargs["checkpoint_callback"] = instantiate_from_config(modelckpt_cfg)
 
-    # add callback which sets up log directory
     default_callbacks_cfg = {
         "setup_callback": {
             "target": "main.SetupCallback",
@@ -648,7 +599,6 @@ if __name__ == "__main__":
             "target": "main.LearningRateMonitor",
             "params": {
                 "logging_interval": "step",
-                # "log_momentum": True
             }
         },
         "cuda_callback": {
@@ -690,20 +640,15 @@ if __name__ == "__main__":
     trainer_kwargs["callbacks"] = [instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg]
 
     trainer = Trainer.from_argparse_args(trainer_opt, **trainer_kwargs)
-    trainer.logdir = logdir  ###
+    trainer.logdir = logdir
 
-    # data
     data = instantiate_from_config(config.data)
-    # NOTE according to https://pytorch-lightning.readthedocs.io/en/latest/datamodules.html
-    # calling these ourselves should not be necessary but it is.
-    # lightning still takes care of proper multiprocessing though
     data.prepare_data()
     data.setup()
     print("#### Data #####")
     for k in data.datasets:
         print(f"{k}, {data.datasets[k].__class__.__name__}, {len(data.datasets[k])}")
 
-    # configure learning rate
     bs, base_lr = config.data.params.batch_size, config.model.base_learning_rate
     if not cpu:
         ngpu = len(str(lightning_config.trainer.gpus).strip(",").split(','))
@@ -726,9 +671,7 @@ if __name__ == "__main__":
         print(f"Setting learning rate to {model.learning_rate:.2e}")
 
 
-    # allow checkpointing via USR1
     def melk(*args, **kwargs):
-        # run all checkpoint hooks
         if trainer.global_rank == 0:
             print("Summoning checkpoint.")
             ckpt_path = os.path.join(ckptdir, "last.ckpt")
@@ -746,7 +689,6 @@ if __name__ == "__main__":
     signal.signal(signal.SIGUSR1, melk)
     signal.signal(signal.SIGUSR2, divein)
 
-    # run
     if opt.train:
         try:
             trainer.fit(model, data)

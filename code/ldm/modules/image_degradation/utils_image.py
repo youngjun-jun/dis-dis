@@ -12,17 +12,6 @@ from datetime import datetime
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 
-'''
-# --------------------------------------------
-# Kai Zhang (github: https://github.com/cszn)
-# 03/Mar/2019
-# --------------------------------------------
-# https://github.com/twhui/SRGAN-pyTorch
-# https://github.com/xinntao/BasicSR
-# --------------------------------------------
-'''
-
-
 IMG_EXTENSIONS = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP', '.tif']
 
 
@@ -378,8 +367,6 @@ def tensor2img(tensor, out_type=np.uint8, min_max=(0, 1)):
 
 
 def augment_img(img, mode=0):
-    '''Kai Zhang (github: https://github.com/cszn)
-    '''
     if mode == 0:
         return img
     elif mode == 1:
@@ -399,8 +386,6 @@ def augment_img(img, mode=0):
 
 
 def augment_img_tensor4(img, mode=0):
-    '''Kai Zhang (github: https://github.com/cszn)
-    '''
     if mode == 0:
         return img
     elif mode == 1:
@@ -420,8 +405,6 @@ def augment_img_tensor4(img, mode=0):
 
 
 def augment_img_tensor(img, mode=0):
-    '''Kai Zhang (github: https://github.com/cszn)
-    '''
     img_size = img.size()
     img_np = img.data.cpu().numpy()
     if len(img_size) == 3:

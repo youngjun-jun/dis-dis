@@ -14,17 +14,6 @@ import albumentations
 
 import ldm.modules.image_degradation.utils_image as util
 
-"""
-# --------------------------------------------
-# Super-Resolution
-# --------------------------------------------
-#
-# Kai Zhang (cskaizhang@gmail.com)
-# https://github.com/cszn
-# From 2019/03--2021/08
-# --------------------------------------------
-"""
-
 
 def modcrop_np(img, sf):
     '''
@@ -143,12 +132,7 @@ def blur(x, k):
 
 
 def gen_kernel(k_size=np.array([15, 15]), scale_factor=np.array([4, 4]), min_var=0.6, max_var=10., noise_level=0):
-    """"
-    # modified version of https://github.com/assafshocher/BlindSR_dataset_generator
-    # Kai Zhang
-    # min_var = 0.175 * sf  # variance of the gaussian kernel will be sampled between min_var and max_var
-    # max_var = 2.5 * sf
-    """
+
     # Set random eigen-vals (lambdas) and angle (theta) for COV matrix
     lambda_1 = min_var + np.random.rand() * (max_var - min_var)
     lambda_2 = min_var + np.random.rand() * (max_var - min_var)
@@ -208,10 +192,7 @@ def fspecial_laplacian(alpha):
 
 
 def fspecial(filter_type, *args, **kwargs):
-    '''
-    python code from:
-    https://github.com/ronaldosena/imagens-medicas-2/blob/40171a6c259edec7827a6693a93955de2bd39e76/Aulas/aula_2_-_uniform_filter/matlab_fspecial.py
-    '''
+
     if filter_type == 'gaussian':
         return fspecial_gaussian(*args, **kwargs)
     if filter_type == 'laplacian':

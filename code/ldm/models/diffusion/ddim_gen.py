@@ -1,5 +1,3 @@
-"""SAMPLING ONLY."""
-
 import torch
 import numpy as np
 from tqdm import tqdm
@@ -76,7 +74,6 @@ class DDIMSampler(object):
                log_every_t=100,
                unconditional_guidance_scale=1.,
                unconditional_conditioning=None,
-               # this has to come in the same format as the conditioning, # e.g. as encoded tokens, ...
                **kwargs
                ):
         if conditioning is not None:
@@ -89,18 +86,9 @@ class DDIMSampler(object):
                     print(f"Warning: Got {conditioning.shape[0]} conditionings but batch-size is {batch_size}")
 
         self.make_schedule(ddim_num_steps=S, ddim_eta=eta, verbose=verbose)
-        # sampling
         C, H, W = shape
         size = (batch_size, C, H, W)
         print(f'Data shape for DDIM sampling is {size}, eta {eta}')
-        
-        # ######################################sampling with condition############################################
-        # condition= np.load("/nfs/home/youngjun/NeurIPS2024/EncDiff/EncDiff-shapes3d/dis_repre/epoch=000010.npz")["latents"]
-        # # conditioning = torch.from_numpy(condition).to(torch.float32).to(self.model.device)[torch.randperm(condition.shape[0])[:batch_size]]
-        # # conditioning = torch.from_numpy(condition).to(torch.float32).to(self.model.device)[torch.randperm(condition.shape[0])[:batch_size]]
-        # conditioning1 = torch.from_numpy(condition).to(torch.float32).to(self.model.device)[:batch_size]
-        # conditioning2 = torch.from_numpy(condition).to(torch.float32).to(self.model.device)[54561:54561+batch_size]
-        # conditioning = torch.cat([conditioning1[:,:20,:],conditioning2[:,20:,:]],dim=1)
         
         conditioning = self.condition
 
@@ -198,18 +186,14 @@ class DDIMSampler(object):
         alphas_prev = self.model.alphas_cumprod_prev if use_original_steps else self.ddim_alphas_prev
         sqrt_one_minus_alphas = self.model.sqrt_one_minus_alphas_cumprod if use_original_steps else self.ddim_sqrt_one_minus_alphas
         sigmas = self.model.ddim_sigmas_for_original_num_steps if use_original_steps else self.ddim_sigmas
-        # select parameters corresponding to the currently considered timestep
         a_t = torch.full((b, 1, 1, 1), alphas[index], device=device)
         a_prev = torch.full((b, 1, 1, 1), alphas_prev[index], device=device)
         sigma_t = torch.full((b, 1, 1, 1), sigmas[index], device=device)
         sqrt_one_minus_at = torch.full((b, 1, 1, 1), sqrt_one_minus_alphas[index],device=device)
 
-        # current prediction for x_0
         pred_x0 = (x - sqrt_one_minus_at * e_t) / a_t.sqrt()
-        # p.savez("data.npz", z=z, x = x, xrec = xrec, x_T = x_T, time = time, alphas = alphas, alphas_prev = alphas_prev, sqrt_one_minus_alphas = sqrt_one_minus_alphas, sigmas = sigmas.cpu().numpy(),e_t = e_t)
         if quantize_denoised:
             pred_x0, _, *_ = self.model.first_stage_model.quantize(pred_x0)
-        # direction pointing to x_t
         dir_xt = (1. - a_prev - sigma_t**2).sqrt() * e_t
         noise = sigma_t * noise_like(x.shape, device, repeat_noise) * temperature
         if noise_dropout > 0.:

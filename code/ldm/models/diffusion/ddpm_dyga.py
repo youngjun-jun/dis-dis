@@ -1,11 +1,3 @@
-"""
-wild mixture of
-https://github.com/lucidrains/denoising-diffusion-pytorch/blob/7706bdfc6f527f58d33f84b7b522e61e6e3164b3/denoising_diffusion_pytorch/denoising_diffusion_pytorch.py
-https://github.com/openai/improved-diffusion/blob/e94489283bb876ac1477d5dd7709bbbd2d9902ce/improved_diffusion/gaussian_diffusion.py
-https://github.com/CompVis/taming-transformers
--- merci
-"""
-
 import torch
 import torch.nn as nn
 import numpy as np
@@ -66,23 +58,23 @@ def uniform_on_device(r1, r2, shape, device):
 
 from concurrent.futures import ThreadPoolExecutor
 
-def process_split_cond_cat(HDDC, split_cond_cat, start, end, logdir, current_epoch):
+def process_split_cond_cat(DyGA, split_cond_cat, start, end, logdir, current_epoch):
     for i in range(start, end):
         split_cond = split_cond_cat[i].squeeze(1)
         split_cond = (split_cond - split_cond.max()) / (split_cond.max() - split_cond.min() + 1e-6)
         if split_cond.shape[0] > 100000:
             for _ in range(20):
                 try:
-                    HDDC[i].fit(split_cond[torch.randperm(split_cond.shape[0])[:split_cond.shape[0]//10]])
+                    DyGA[i].fit(split_cond[torch.randperm(split_cond.shape[0])[:split_cond.shape[0]//10]])
                     break
                 except ValueError:
                     continue
         
         else:
-            HDDC[i].fit(split_cond)
+            DyGA[i].fit(split_cond)
         torch.cuda.empty_cache()  
 
-def parallel_process(HDDC, split_cond_cat, logdir, current_epoch, num_threads=4):
+def parallel_process(DyGA, split_cond_cat, logdir, current_epoch, num_threads=4):
     chunk_size = 5
     total_chunks = len(split_cond_cat) // chunk_size
     
@@ -91,20 +83,20 @@ def parallel_process(HDDC, split_cond_cat, logdir, current_epoch, num_threads=4)
         for i in range(total_chunks):
             start = i * chunk_size
             end = start + chunk_size
-            futures.append(executor.submit(process_split_cond_cat, HDDC, split_cond_cat, start, end, logdir, current_epoch))
+            futures.append(executor.submit(process_split_cond_cat, DyGA, split_cond_cat, start, end, logdir, current_epoch))
         for future in futures:
             future.result() 
 
     remaining_start = total_chunks * chunk_size
     if remaining_start < len(split_cond_cat):
-        process_split_cond_cat(HDDC, split_cond_cat, remaining_start, len(split_cond_cat), logdir, current_epoch)
+        process_split_cond_cat(DyGA, split_cond_cat, remaining_start, len(split_cond_cat), logdir, current_epoch)
 
     os.makedirs(os.path.join(logdir, "gaussian"), exist_ok=True)
     np.savez(os.path.join(logdir, "gaussian","gaussian-epoch={:06}.npz".format(current_epoch)), 
-                means=torch.cat([HDDC[i].means.cpu() for i in range(len(HDDC))], dim=0).numpy(),
-                sigma=torch.cat([HDDC[i].covariances.cpu() for i in range(len(HDDC))], dim=0).numpy(),
-                pi=torch.cat([HDDC[i].weights.cpu() for i in range(len(HDDC))], dim=0).numpy(),
-                K=np.array([HDDC[i].n_clusters for i in range(len(HDDC))])
+                means=torch.cat([DyGA[i].means.cpu() for i in range(len(DyGA))], dim=0).numpy(),
+                sigma=torch.cat([DyGA[i].covariances.cpu() for i in range(len(DyGA))], dim=0).numpy(),
+                pi=torch.cat([DyGA[i].weights.cpu() for i in range(len(DyGA))], dim=0).numpy(),
+                K=np.array([DyGA[i].n_clusters for i in range(len(DyGA))])
                 )
 
 
@@ -523,7 +515,7 @@ class LatentDiffusion(DDPM):
                  dis_weight = 1.0,
                  dis_loss_type = "IM",
                  log_dir = None,
-                 HDDC_config = None,
+                 DyGA_config = None,
                  *args, **kwargs):
         self.num_timesteps_cond = default(num_timesteps_cond, 1)
         self.scale_by_std = scale_by_std
@@ -557,8 +549,8 @@ class LatentDiffusion(DDPM):
         self.instantiate_first_stage(first_stage_config)
         self.instantiate_cond_stage(cond_stage_config)
         
-        self.HDDC = None
-        self.HDDC_config = HDDC_config
+        self.DyGA = None
+        self.DyGA_config = DyGA_config
         self.latent_units = cond_stage_config.params.latent_units
 
 
@@ -658,18 +650,6 @@ class LatentDiffusion(DDPM):
             raise NotImplementedError(f"encoder_posterior of type '{type(encoder_posterior)}' not yet implemented")
         return self.scale_factor * z
 
-    # def get_learned_conditioning(self, c):
-    #     if self.cond_stage_forward is None:
-    #         if hasattr(self.cond_stage_model, 'encode') and callable(self.cond_stage_model.encode):
-    #             c = self.cond_stage_model.encode(c)
-    #             if isinstance(c, DiagonalGaussianDistribution):
-    #                 c = c.mode()
-    #         else:
-    #             c = self.cond_stage_model(c)
-    #     else:
-    #         assert hasattr(self.cond_stage_model, self.cond_stage_forward)
-    #         c = getattr(self.cond_stage_model, self.cond_stage_forward)(c)
-    #     return c
     def get_learned_conditioning(self, c):
         if self.cond_stage_forward is None:
             if hasattr(self.cond_stage_model, 'encode') and callable(self.cond_stage_model.encode):
@@ -996,14 +976,14 @@ class LatentDiffusion(DDPM):
                 tc = self.cond_ids[t].to(self.device)
                 c = self.q_sample(x_start=c, t=tc, noise=torch.randn_like(c.float()))
             
-            if self.HDDC is not None:
+            if self.DyGA is not None:
                 split_tensors = torch.split(c, 1, dim=1)
                 quant_tensors = []
                 for i in range(len(split_tensors)):
                     split_tensor = split_tensors[i].squeeze(1)
                     split_tensor = (split_tensor - split_tensor.max()) / (split_tensor.max() - split_tensor.min() + 1e-6)
-                    # quant_tensors.append(self.HDDC[i].predict(split_tensor, tau=1e-4))
-                    quant_tensors.append(self.HDDC[i].predict0(split_tensor))
+                    # quant_tensors.append(self.DyGA[i].predict(split_tensor, tau=1e-4))
+                    quant_tensors.append(self.DyGA[i].predict0(split_tensor))
                 cq = torch.stack(quant_tensors, dim=1)
                 lambda_mix = 1/10 * torch.exp(-torch.mean(torch.abs((c-cq)/(c+1e-6))))
                 c = lambda_mix * cq + (1 - lambda_mix) * c
@@ -1148,14 +1128,14 @@ class LatentDiffusion(DDPM):
         x = super().get_input(batch, self.cond_stage_key)
         cond = self.cond_stage_model(x)
         
-        if self.HDDC is not None:
+        if self.DyGA is not None:
             split_tensors = torch.split(cond, 1, dim=1)
             quant_tensors = []
             for i in range(len(split_tensors)):
                 split_tensor = split_tensors[i].squeeze(1)
                 split_tensor = (split_tensor - split_tensor.max()) / (split_tensor.max() - split_tensor.min() + 1e-6)
-                # quant_tensors.append(self.HDDC[i].predict(split_tensor, tau=1e-4))
-                quant_tensors.append(self.HDDC[i].predict0(split_tensor))
+                # quant_tensors.append(self.DyGA[i].predict(split_tensor, tau=1e-4))
+                quant_tensors.append(self.DyGA[i].predict0(split_tensor))
             # cond = torch.stack(quant_tensors, dim=1)
             cq = torch.stack(quant_tensors, dim=1)
             lambda_mix = 1/10 * torch.exp(-torch.mean(torch.abs((cond-cq)/(cond+1e-6))))
@@ -1181,44 +1161,26 @@ class LatentDiffusion(DDPM):
 
         # if (self.current_epoch+1) * cond_cat.shape[0] > 100000:
         split_cond_cat = torch.split(cond_cat, 1, dim=1)
-        if self.HDDC_config is not None:
-            self.HDDC = [instantiate_from_config(self.HDDC_config) for _ in range(self.latent_units)]
-            for HDDC in self.HDDC:
-                HDDC.device = self.device
+        if self.DyGA_config is not None:
+            self.DyGA = [instantiate_from_config(self.DyGA_config) for _ in range(self.latent_units)]
+            for DyGA in self.DyGA:
+                DyGA.device = self.device
                 
-        parallel_process(self.HDDC, split_cond_cat, self.logdir, self.current_epoch)
-        
-        # for i in range(len(split_cond_cat)):
-        #     split_cond = split_cond_cat[i].squeeze(1)
-        #     split_cond = (split_cond - split_cond.max()) / (split_cond.max() - split_cond.min() + 1e-6)
-        #     if split_cond.shape[0] > 100000:
-        #         self.HDDC[i].fit(split_cond[torch.randperm(split_cond.shape[0])[:split_cond.shape[0]//10]])
-        #     else:
-        #         self.HDDC[i].fit(split_cond)
-        #     torch.cuda.empty_cache()  
-            
-        # os.makedirs(os.path.join(self.logdir, "gaussian"), exist_ok=True)
-        # np.savez(os.path.join(self.logdir, "gaussian","gaussian-epoch={:06}.npz".format(self.current_epoch)), 
-        #             means=torch.cat([self.HDDC[i].means.cpu() for i in range (len(self.HDDC))], dim=0).numpy(),
-        #             sigma=torch.cat([self.HDDC[i].covariances.cpu() for i in range (len(self.HDDC))], dim=0).numpy(),
-        #             pi=torch.cat([self.HDDC[i].weights.cpu() for i in range (len(self.HDDC))], dim=0).numpy(),
-        #             K=np.array([self.HDDC[i].n_clusters for i in range (len(self.HDDC))])
-        #             )
-
+        parallel_process(self.DyGA, split_cond_cat, self.logdir, self.current_epoch)
 
 
     @torch.no_grad()
     def test_step(self, batch, batch_idx):
         x = super().get_input(batch, self.cond_stage_key)
         cond = self.cond_stage_model(x)
-        if self.HDDC is not None:
+        if self.DyGA is not None:
             split_tensors = torch.split(cond, 1, dim=1)
             quant_tensors = []
             for i in range(len(split_tensors)):
                 split_tensor = split_tensors[i].squeeze(1)
                 split_tensor = (split_tensor - split_tensor.max()) / (split_tensor.max() - split_tensor.min() + 1e-6)
-                # quant_tensors.append(self.HDDC[i].predict(split_tensor, tau=1e-4))
-                quant_tensors.append(self.HDDC[i].predict0(split_tensor))
+                # quant_tensors.append(self.DyGA[i].predict(split_tensor, tau=1e-4))
+                quant_tensors.append(self.DyGA[i].predict0(split_tensor))
             # cond = torch.stack(quant_tensors, dim=1)
             cq = torch.stack(quant_tensors, dim=1)
             lambda_mix = 1/10 * torch.exp(-torch.mean(torch.abs((cond-cq)/(cond+1e-6))))

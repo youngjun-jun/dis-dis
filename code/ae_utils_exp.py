@@ -551,7 +551,6 @@ class VAE(torch.nn.Module):
         return mu_scores, std_scores, inp, rec
     
 
-# From https://github.com/rtqichen/beta-tcvae/blob/master/vae_quant.py
 def logsumexp(value, dim=None, keepdim=False):
     """Numerically stable implementation of the operation
 
@@ -592,7 +591,6 @@ class B_TCVAE(VAE):
             raise AttributeError("expected gaussian or bernoulli, but got {}".format(rec_dstr))
         self.to(device)
         
-    # FROM RTQ CHEN at https://github.com/rtqichen/beta-tcvae/blob/master/vae_quant.py -----------
     def qz_estimate(self, _z_s, _z_mu, _z_log_var, _dataset_size):
         """
         _z_s: samples of z of shape (batch_size, z_dim)
