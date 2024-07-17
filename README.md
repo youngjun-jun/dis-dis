@@ -1,4 +1,4 @@
-# README
+# Disentangling Disentangled Representations: Towards Improved Latent Units via Diffusion Models
 
 ## Prerequisites
 
