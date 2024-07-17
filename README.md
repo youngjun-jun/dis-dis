@@ -18,6 +18,7 @@ To start the training process, run the following script:
 
 ```bash
 /code/scripts/train.sh
+```
 
 ## Evaluation
 
