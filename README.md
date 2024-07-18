@@ -1,6 +1,16 @@
 # Disentangling Disentangled Representations: Towards Improved Latent Units via Diffusion Models
 
-## Prerequisites
+## Prepare data
+* Cars3d   
+Download [nips2015-analogy-data.tar.gz](http://www.scottreed.info/files/nips2015-analogy-data.tar.gz)
+* Shapes3d  
+Download [3dshapes.h5](https://console.cloud.google.com/storage/browser/3d-shapes)
+* MPI3D-toy
+Download [mpi3d_toy.npz](https://storage.googleapis.com/mpi3d_disentanglement_dataset/data/mpi3d_toy.npz)
+* CelebA
+Download [CelebA/Img](https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) (CelebA)
+or
+Download [celeba-dataset.zip](https://www.kaggle.com/datasets/jessicali9530/celeba-dataset) (Kaggle)
 
 Prepare the following datasets in the specified format:
 
@@ -8,6 +18,10 @@ Prepare the following datasets in the specified format:
 - **shapes3d**
 - **mpi3d**
 - **celeba**
+
+```bash
+code/datasets/dataset.py
+```
 
 Place the images in the directory structure:  
 `code/datasets/dataset_name/image_{number}.png`
@@ -17,7 +31,7 @@ Place the images in the directory structure:
 To start the training process, run the following script:
 
 ```bash
-/code/scripts/train.sh
+code/scripts/train.sh
 ```
 
 ## Evaluation
@@ -25,7 +39,7 @@ To start the training process, run the following script:
 To evaluate the trained model, use the following script:
 
 ```bash
-/code/scripts/eval.sh
+code/scripts/eval.sh
 ```
 
 ## Latent Interchange
@@ -33,7 +47,7 @@ To evaluate the trained model, use the following script:
 For latent interchange operations, run the script:
 
 ```bash
-/code/scripts/latent-interchange.sh
+code/scripts/latent-interchange.sh
 ```
 
 ## Image Generation for FID
@@ -41,8 +55,9 @@ For latent interchange operations, run the script:
 To generate images for the Fréchet Inception Distance (FID) score calculation, use:
 
 ```bash
-/code/scripts/sampling-for-fid.sh
+code/scripts/sampling-for-fid.sh
 ```
 
+## Acknowledgement
 
-This codebase is based on the paper "DisDiff: Unsupervised Disentanglement of Diffusion Probabilistic Models" presented at NeurIPS 2023. For more details, please refer to the original repository: https://github.com/ThomasMrY/DisDiff
+We based our codes on [ThomasMrY/DisDiff](https://github.com/ThomasMrY/DisDiff)
