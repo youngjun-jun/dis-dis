@@ -58,6 +58,24 @@ To generate images for the Fréchet Inception Distance (FID) score calculation, 
 code/scripts/sampling-for-fid.sh
 ```
 
+## Files
+* Cars3d   
+[Model](https://drive.google.com/file/d/1OdTum8mFAUCSfeXxDBipzzlh5PacBbLn/view?usp=drive_link)
+[Gaussians](https://drive.google.com/file/d/1BMMH55TC7aFmHZZyxicMo-m5kp72Sd6j/view?usp=drive_link)
+[Label CSV (for Test)](https://drive.google.com/file/d/1VQo7hTNjwkDYOael-dl4_ZI2U_Qp9-C0/view?usp=drive_link)
+* Shapes3d  
+[Model](https://drive.google.com/file/d/1Zj-6idOErPzFr3YRaAfZ7KuSt6_THgcN/view?usp=drive_link)
+[Gaussians](https://drive.google.com/file/d/1zCbr27XhBqCXXO3jRrPPLBcM5g31KJQ5/view?usp=drive_link)
+[Label CSV (for Test)](https://drive.google.com/file/d/1qo5P1wcuemweMXfwqGyp_M4ZWjKZcqI3/view?usp=drive_link)
+* MPI3D-toy
+[Model](https://drive.google.com/file/d/1Tq5ROEKzWkuNh05SosCU3wfYuq8ioiX8/view?usp=drive_link)
+[Gaussians](https://drive.google.com/file/d/1sWKoYx8uMSdijsmslIueySkY6nvaVKEq/view?usp=drive_link)
+[Label CSV (for Test)](https://drive.google.com/file/d/120dOm-tBVOaNcpVnWy1B42Q8h8py5BOE/view?usp=drive_link)
+* CelebA
+[Model](https://drive.google.com/file/d/1kQ-_W_nj7MZkHmEcPoMUegI6nrHyJ-K7/view?usp=drive_link)
+[Gaussians](https://drive.google.com/file/d/1FDadeGqzpKMZcjVomJxs1o_xmbVqclR5/view?usp=drive_link)
+Label CSV: Download [celeba-dataset.zip](https://www.kaggle.com/datasets/jessicali9530/celeba-dataset) (Kaggle)
+
 ## Acknowledgement
 
 We based our codes on [ThomasMrY/DisDiff](https://github.com/ThomasMrY/DisDiff)
