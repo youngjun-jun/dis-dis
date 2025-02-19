@@ -59,10 +59,14 @@ code/scripts/sampling-for-fid.sh
 ```
 
 ## Files
-* Cars3d   
+* Cars3d
+  
 [Model](https://drive.google.com/file/d/1OdTum8mFAUCSfeXxDBipzzlh5PacBbLn/view?usp=drive_link)
+
 [Gaussians](https://drive.google.com/file/d/1BMMH55TC7aFmHZZyxicMo-m5kp72Sd6j/view?usp=drive_link)
+
 [Label CSV (for Test)](https://drive.google.com/file/d/1VQo7hTNjwkDYOael-dl4_ZI2U_Qp9-C0/view?usp=drive_link)
+
 * Shapes3d  
 [Model](https://drive.google.com/file/d/1Zj-6idOErPzFr3YRaAfZ7KuSt6_THgcN/view?usp=drive_link)
 [Gaussians](https://drive.google.com/file/d/1zCbr27XhBqCXXO3jRrPPLBcM5g31KJQ5/view?usp=drive_link)
