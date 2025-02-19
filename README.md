@@ -60,23 +60,23 @@ code/scripts/sampling-for-fid.sh
 
 ## Files
 ### Cars3d
-- **Model:** [Download](https://drive.google.com/file/d/1OdTum8mFAUCSfeXxDBipzzlh5PacBbLn/view?usp=drive_link)
-- **Gaussians:** [Download](https://drive.google.com/file/d/1BMMH55TC7aFmHZZyxicMo-m5kp72Sd6j/view?usp=drive_link)
-- **Label CSV (for Test):** [Download](https://drive.google.com/file/d/1VQo7hTNjwkDYOael-dl4_ZI2U_Qp9-C0/view?usp=drive_link)
+- **Model:** [Download](https://drive.google.com/file/d/1OdTum8mFAUCSfeXxDBipzzlh5PacBbLn/view?usp=drive_link) (Drive)
+- **Gaussians:** [Download](https://drive.google.com/file/d/1BMMH55TC7aFmHZZyxicMo-m5kp72Sd6j/view?usp=drive_link) (Drive)
+- **Label CSV (for Test):** [Download](https://drive.google.com/file/d/1VQo7hTNjwkDYOael-dl4_ZI2U_Qp9-C0/view?usp=drive_link) (Drive)
 
 ### Shapes3d
-- **Model:** [Download](https://drive.google.com/file/d/1Zj-6idOErPzFr3YRaAfZ7KuSt6_THgcN/view?usp=drive_link)
-- **Gaussians:** [Download](https://drive.google.com/file/d/1zCbr27XhBqCXXO3jRrPPLBcM5g31KJQ5/view?usp=drive_link)
-- **Label CSV (for Test):** [Download](https://drive.google.com/file/d/1qo5P1wcuemweMXfwqGyp_M4ZWjKZcqI3/view?usp=drive_link)
+- **Model:** [Download](https://drive.google.com/file/d/1Zj-6idOErPzFr3YRaAfZ7KuSt6_THgcN/view?usp=drive_link) (Drive)
+- **Gaussians:** [Download](https://drive.google.com/file/d/1zCbr27XhBqCXXO3jRrPPLBcM5g31KJQ5/view?usp=drive_link) (Drive)
+- **Label CSV (for Test):** [Download](https://drive.google.com/file/d/1qo5P1wcuemweMXfwqGyp_M4ZWjKZcqI3/view?usp=drive_link) (Drive)
 
 ### MPI3D-toy
-- **Model:** [Download](https://drive.google.com/file/d/1Tq5ROEKzWkuNh05SosCU3wfYuq8ioiX8/view?usp=drive_link)
-- **Gaussians:** [Download](https://drive.google.com/file/d/1sWKoYx8uMSdijsmslIueySkY6nvaVKEq/view?usp=drive_link)
-- **Label CSV (for Test):** [Download](https://drive.google.com/file/d/120dOm-tBVOaNcpVnWy1B42Q8h8py5BOE/view?usp=drive_link)
+- **Model:** [Download](https://drive.google.com/file/d/1Tq5ROEKzWkuNh05SosCU3wfYuq8ioiX8/view?usp=drive_link) (Drive)
+- **Gaussians:** [Download](https://drive.google.com/file/d/1sWKoYx8uMSdijsmslIueySkY6nvaVKEq/view?usp=drive_link) (Drive)
+- **Label CSV (for Test):** [Download](https://drive.google.com/file/d/120dOm-tBVOaNcpVnWy1B42Q8h8py5BOE/view?usp=drive_link) (Drive)
 
 ### CelebA
-- **Model:** [Download](https://drive.google.com/file/d/1kQ-_W_nj7MZkHmEcPoMUegI6nrHyJ-K7/view?usp=drive_link)
-- **Gaussians:** [Download](https://drive.google.com/file/d/1FDadeGqzpKMZcjVomJxs1o_xmbVqclR5/view?usp=drive_link)
+- **Model:** [Download](https://drive.google.com/file/d/1kQ-_W_nj7MZkHmEcPoMUegI6nrHyJ-K7/view?usp=drive_link) (Drive)
+- **Gaussians:** [Download](https://drive.google.com/file/d/1FDadeGqzpKMZcjVomJxs1o_xmbVqclR5/view?usp=drive_link) (Drive)
 - **Label CSV (for Test, included in the dataset):** [Download](https://www.kaggle.com/datasets/jessicali9530/celeba-dataset) (Kaggle)
 
 ## Acknowledgement
