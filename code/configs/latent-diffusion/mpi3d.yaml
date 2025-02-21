@@ -69,7 +69,7 @@ model:
         num_channels: 3
         context_dim: 32
 
-    HDDC_config:
+    DyGA_config:
       target: ldm.modules.gaussian.DyGA.DyGA
       params:
         n_clusters: 8
