@@ -1,4 +1,5 @@
 # Disentangling Disentangled Representations: Towards Improved Latent Units via Diffusion Models
+[Paper](https://openaccess.thecvf.com/content/WACV2025/html/Jun_Disentangling_Disentangled_Representations_Towards_Improved_Latent_Units_via_Diffusion_Models_WACV_2025_paper.html)
 
 ## Prepare data
 * Cars3d   
