@@ -61,33 +61,34 @@ code/scripts/sampling-for-fid.sh
 
 ## Files
 ### Cars3d
-- **First Stage Model:** [Download](https://drive.google.com/file/d/163ef-0Sq7K_vMGmqYxypkN35FpPyMqB0/view?usp=sharing) (Drive)
-- **Model:** [Download](https://drive.google.com/file/d/1OdTum8mFAUCSfeXxDBipzzlh5PacBbLn/view?usp=drive_link) (Drive)
-- **Representations:** [Download](https://drive.google.com/file/d/188xGmT3RVnuL6vTkP0CCfRhmx0dzRecr/view?usp=sharing) (Drive)
-- **Gaussians:** [Download](https://drive.google.com/file/d/1BMMH55TC7aFmHZZyxicMo-m5kp72Sd6j/view?usp=drive_link) (Drive)
-- **Label CSV (for Test):** [Download](https://drive.google.com/file/d/1VQo7hTNjwkDYOael-dl4_ZI2U_Qp9-C0/view?usp=drive_link) (Drive)
+- **First Stage Model:** [Download](https://drive.google.com/file/d/1fdc7oI_n1RgWk7QYi0JDSJQDWhopCNXh/view?usp=sharing) (Drive)
+- **Model:** [Download](https://drive.google.com/file/d/1gzv9E2QqiVy5DzeaJEk_o6Q2QPaHXuh9/view?usp=sharing) (Drive)
+- **Representations:** [Download](https://drive.google.com/file/d/1TJIEKFVxpjEzr_Q08rh03AwCmFueQ6ht/view?usp=sharing) (Drive)
+- **Gaussians:** [Download](https://drive.google.com/file/d/1BYoLu4-IRo5598p6vLNEkMmOBZzltber/view?usp=sharing) (Drive)
+- **Label CSV (for Test):** [Download](https://drive.google.com/file/d/1ndOAnFaZedGfbqp4MnkFFCwilRVmcwnM/view?usp=sharing) (Drive)
 
 ### Shapes3d
-- **First Stage Model:** [Download](https://drive.google.com/file/d/1Hh4BVH3CevZnQfXq8mEbiidtTq1LeX6X/view?usp=sharing) (Drive)
-- **Model:** [Download](https://drive.google.com/file/d/1Zj-6idOErPzFr3YRaAfZ7KuSt6_THgcN/view?usp=drive_link) (Drive)
-- **Representations:** [Download](https://drive.google.com/file/d/1W7X8oqoF9U94Gq0q8csCXi1Fh_112qlJ/view?usp=sharing) (Drive)
-- **Gaussians:** [Download](https://drive.google.com/file/d/1zCbr27XhBqCXXO3jRrPPLBcM5g31KJQ5/view?usp=drive_link) (Drive)
-- **Label CSV (for Test):** [Download](https://drive.google.com/file/d/1qo5P1wcuemweMXfwqGyp_M4ZWjKZcqI3/view?usp=drive_link) (Drive)
+- **First Stage Model:** [Download](https://drive.google.com/file/d/1uKRJUcY6Jk77T1izxtS9cbniQ1c3C0s1/view?usp=sharing) (Drive)
+- **Model:** [Download](https://drive.google.com/file/d/1EAu5TJo1KlZIBUSWldIirUSJQvYRHccm/view?usp=sharing) (Drive)
+- **Representations:** [Download](https://drive.google.com/file/d/15kFDoKH1m0hyG6j4pzFhLg1zKaMJwrG9/view?usp=sharing) (Drive)
+- **Gaussians:** [Download](https://drive.google.com/file/d/1cvm0tG64igcidr8D6NzbHdRhA2JHYg0E/view?usp=sharing) (Drive)
+- **Label CSV (for Test):** [Download](https://drive.google.com/file/d/1sbtn5rGVkGzq37WykTIWszKEBLCFLjFp/view?usp=sharing) (Drive)
 
 ### MPI3D-toy
-- **First Stage Model:** [Download](https://drive.google.com/file/d/1bO_-QzxICIYzsBrhEj1N2XRdq830B_Ir/view?usp=sharing) (Drive)
-- **Model:** [Download](https://drive.google.com/file/d/1Tq5ROEKzWkuNh05SosCU3wfYuq8ioiX8/view?usp=drive_link) (Drive)
-- **Representations:** [Download](https://drive.google.com/file/d/1EUN-55qD6sGGM-sd0VmIRvdS_5gY2ldv/view?usp=sharing) (Drive)
-- **Gaussians:** [Download](https://drive.google.com/file/d/1sWKoYx8uMSdijsmslIueySkY6nvaVKEq/view?usp=drive_link) (Drive)
-- **Label CSV (for Test):** [Download](https://drive.google.com/file/d/120dOm-tBVOaNcpVnWy1B42Q8h8py5BOE/view?usp=drive_link) (Drive)
+- **First Stage Model:** [Download](https://drive.google.com/file/d/1_5xyLxdpBdQI6fNgPEbHVZ0JPxBqZlQf/view?usp=sharing) (Drive)
+- **Model:** [Download](https://drive.google.com/file/d/1PCIo-79x0Lw2u6DPMlWFoZKiKeWGiKRz/view?usp=sharing) (Drive)
+- **Representations:** [Download](https://drive.google.com/file/d/1HIwk8FbfN9m6p7-FB_OhJ37gGRfdRuak/view?usp=sharing) (Drive)
+- **Gaussians:** [Download](https://drive.google.com/file/d/1-TFps1mxnqlTcOhm0lxsfk6F02B4EDFA/view?usp=sharing) (Drive)
+- **Label CSV (for Test):** [Download](https://drive.google.com/file/d/1qP4NY-7zc6MH5iJ5gGvkqhKbfx6ZG_sS/view?usp=sharing) (Drive)
 
 ### CelebA
-- **First Stage Model:** [Download](https://drive.google.com/file/d/1xxWiKve_faXSOQR25DxDG6FwL8PCD72f/view?usp=sharing) (Drive)
-- **Model:** [Download](https://drive.google.com/file/d/1kQ-_W_nj7MZkHmEcPoMUegI6nrHyJ-K7/view?usp=drive_link) (Drive)
-- **Representations:** [Download](https://drive.google.com/file/d/1yQkszojXAKCQXjIaTBIIi_SGNwtWie2j/view?usp=sharing) (Drive)
-- **Gaussians:** [Download](https://drive.google.com/file/d/1FDadeGqzpKMZcjVomJxs1o_xmbVqclR5/view?usp=drive_link) (Drive)
+- **First Stage Model:** [Download](https://drive.google.com/file/d/1-rtCLgyCNj9m4jbFUlVTnKPV2ubI8lx0/view?usp=sharing) (Drive)
+- **Model:** [Download](https://drive.google.com/file/d/1mU8ToGR9Mdcvx-klXl1KlNs5HJa9f1mD/view?usp=sharing) (Drive)
+- **Representations:** [Download](https://drive.google.com/file/d/1vT9eb073AHi_wy4ZLDgDeQzlIYUvjZCn/view?usp=sharing) (Drive)
+- **Gaussians:** [Download](https://drive.google.com/file/d/1VCgtg0XRHUHDDMdvV8fmafzU5nufLUtV/view?usp=sharing) (Drive)
 - **Label CSV (for Test, included in the dataset):** [Download](https://www.kaggle.com/datasets/jessicali9530/celeba-dataset) (Kaggle)
 
 ## Acknowledgement
 
 We based our codes on [ThomasMrY/DisDiff](https://github.com/ThomasMrY/DisDiff)
+
